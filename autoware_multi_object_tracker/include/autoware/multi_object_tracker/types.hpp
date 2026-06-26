@@ -19,12 +19,10 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <autoware_perception_msgs/msg/detected_object.hpp>
-#include <autoware_perception_msgs/msg/detected_object_kinematics.hpp>
-#include <autoware_perception_msgs/msg/detected_objects.hpp>
 #include <autoware_perception_msgs/msg/shape.hpp>
-#include <autoware_perception_msgs/msg/tracked_object.hpp>
-#include <autoware_perception_msgs/msg/tracked_object_kinematics.hpp>
+#include <perception_msgs/msg/object.hpp>
+#include <perception_msgs/msg/object_list.hpp>
+#include <perception_msgs_utils/object_access.hpp>
 #include <geometry_msgs/msg/point.hpp>
 #include <geometry_msgs/msg/polygon.hpp>
 #include <geometry_msgs/msg/pose_with_covariance.hpp>
@@ -160,7 +158,7 @@ inline std::optional<TrackerType> toTrackerType(const std::string & tracker_name
   return std::nullopt;
 }
 
-// Shape type — mirrors autoware_perception_msgs::msg::Shape constants
+// Shape type — mirrors autoware_perception_msgs::msg::Shape constants (internal use)
 enum class ShapeType : uint8_t {
   BOUNDING_BOX = 0,
   CYLINDER = 1,
@@ -424,13 +422,12 @@ struct ObjectsWithAssociation
 using ObjectsWithAssociationList = std::vector<ObjectsWithAssociation>;
 
 DynamicObject toDynamicObject(
-  const autoware_perception_msgs::msg::DetectedObject & det_object, const uint channel_index = 0);
+  const perception_msgs::msg::Object & obj, const uint channel_index = 0);
 
 DynamicObjectList toDynamicObjectList(
-  const autoware_perception_msgs::msg::DetectedObjects & det_objects, const uint channel_index = 0);
+  const perception_msgs::msg::ObjectList & obj_list, const uint channel_index = 0);
 
-autoware_perception_msgs::msg::TrackedObject toTrackedObjectMsg(const DynamicObject & dyn_object);
-autoware_perception_msgs::msg::DetectedObject toDetectedObjectMsg(const DynamicObject & dyn_object);
+perception_msgs::msg::Object toObjectMsg(const DynamicObject & dyn_object);
 
 double getArea(const autoware_perception_msgs::msg::Shape & shape);
 

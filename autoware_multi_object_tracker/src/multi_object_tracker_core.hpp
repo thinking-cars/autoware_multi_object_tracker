@@ -25,8 +25,7 @@
 #include <autoware/agnocast_wrapper/node.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include <autoware_perception_msgs/msg/detected_objects.hpp>
-#include <autoware_perception_msgs/msg/tracked_objects.hpp>
+#include <perception_msgs/msg/object_list.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/transform.hpp>
 
@@ -102,15 +101,15 @@ struct ObjectProcessingResult
 struct PublishingData
 {
   rclcpp::Time object_time;
-  autoware_perception_msgs::msg::TrackedObjects tracked_objects;
+  perception_msgs::msg::ObjectList tracked_objects;
   size_t tracked_objects_size;
 };
 
 struct OptionalPublishingData
 {
   double min_extrapolation_time;
-  std::optional<autoware_perception_msgs::msg::DetectedObjects> merged_objects;
-  std::optional<autoware_perception_msgs::msg::TrackedObjects> tentative_objects;
+  std::optional<perception_msgs::msg::ObjectList> merged_objects;
+  std::optional<perception_msgs::msg::ObjectList> tentative_objects;
 };
 
 //// Parameter processing
@@ -121,18 +120,18 @@ bool should_publish(
   const rclcpp::Time & current_time, const MultiObjectTrackerParameters & params,
   MultiObjectTrackerInternalState & state);
 
-autoware_perception_msgs::msg::TrackedObjects get_tracked_objects_(
+perception_msgs::msg::ObjectList get_tracked_objects_(
   const rclcpp::Time & object_time, const MultiObjectTrackerParameters & params,
   const MultiObjectTrackerInternalState & state);
 
-std::optional<autoware_perception_msgs::msg::DetectedObjects> get_merged_objects_(
+std::optional<perception_msgs::msg::ObjectList> get_merged_objects_(
   const rclcpp::Time & object_time, const MultiObjectTrackerParameters & params,
   const MultiObjectTrackerInternalState & state, const rclcpp::Logger & logger);
 
 //// Low-level processing functions
 MeasurementProcessingResult process_measurement(
   const size_t channel_index,
-  AUTOWARE_MESSAGE_CONST_SHARED_PTR(autoware_perception_msgs::msg::DetectedObjects) msg,
+  AUTOWARE_MESSAGE_CONST_SHARED_PTR(perception_msgs::msg::ObjectList) msg,
   const rclcpp::Time & current_time, MultiObjectTrackerInternalState & state,
   TrackerDebugger & debugger);
 

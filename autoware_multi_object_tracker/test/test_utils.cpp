@@ -13,9 +13,6 @@
 // limitations under the License.
 #include "test_utils.hpp"
 
-#include <autoware_perception_msgs/msg/detected_object.hpp>
-#include <autoware_perception_msgs/msg/detected_objects.hpp>
-
 #include <array>
 #include <cstring>
 #include <filesystem>
@@ -66,68 +63,17 @@ void printFrameStats(
             << std::endl;
 }
 
-autoware_perception_msgs::msg::DetectedObject toDetectedObject(
-  const autoware::multi_object_tracker::types::DynamicObject & dyn_object)
-{
-  autoware_perception_msgs::msg::DetectedObject det_object;
-
-  // classification
-  det_object.classification =
-    autoware::multi_object_tracker::classes::toClassificationMsgs(dyn_object.classification);
-
-  // pose and covariance
-  det_object.kinematics.pose_with_covariance.pose = dyn_object.pose;
-  det_object.kinematics.pose_with_covariance.covariance = dyn_object.pose_covariance;
-
-  // twist and covariance
-  det_object.kinematics.twist_with_covariance.twist = dyn_object.twist;
-  det_object.kinematics.twist_with_covariance.covariance = dyn_object.twist_covariance;
-
-  det_object.kinematics.has_position_covariance = dyn_object.kinematics.has_position_covariance;
-
-  // orientation availability
-  using DetKinematics = autoware_perception_msgs::msg::DetectedObjectKinematics;
-  using OrientationAvailability = autoware::multi_object_tracker::types::OrientationAvailability;
-  switch (dyn_object.kinematics.orientation_availability) {
-    case OrientationAvailability::UNAVAILABLE:
-      det_object.kinematics.orientation_availability = DetKinematics::UNAVAILABLE;
-      break;
-    case OrientationAvailability::SIGN_UNKNOWN:
-      det_object.kinematics.orientation_availability = DetKinematics::SIGN_UNKNOWN;
-      break;
-    case OrientationAvailability::AVAILABLE:
-      det_object.kinematics.orientation_availability = DetKinematics::AVAILABLE;
-      break;
-    default:
-      det_object.kinematics.orientation_availability = DetKinematics::UNAVAILABLE;
-      break;
-  }
-
-  det_object.kinematics.has_twist = dyn_object.kinematics.has_twist;
-  det_object.kinematics.has_twist_covariance = dyn_object.kinematics.has_twist_covariance;
-
-  // shape
-  det_object.shape = dyn_object.shape;
-
-  // existence probability
-  det_object.existence_probability = dyn_object.existence_probability;
-
-  return det_object;
-}
-
-// Conversion from DynamicObjectList to TrackedObjects message
-autoware_perception_msgs::msg::DetectedObjects toDetectedObjectsMsg(
+perception_msgs::msg::ObjectList toDetectedObjectsMsg(
   const autoware::multi_object_tracker::types::DynamicObjectList & dyn_objects)
 {
-  autoware_perception_msgs::msg::DetectedObjects detected_objects;
-  detected_objects.header = dyn_objects.header;
-
-  detected_objects.objects.reserve(dyn_objects.objects.size());
+  perception_msgs::msg::ObjectList object_list;
+  object_list.header = dyn_objects.header;
+  object_list.objects.reserve(dyn_objects.objects.size());
   for (const auto & dyn_object : dyn_objects.objects) {
-    detected_objects.objects.emplace_back(toDetectedObject(dyn_object));
+    object_list.objects.emplace_back(
+      autoware::multi_object_tracker::types::toObjectMsg(dyn_object));
   }
-
-  return detected_objects;
+  return object_list;
 }
 
 // ==========================
@@ -172,7 +118,7 @@ RosbagWriterHelper::RosbagWriterHelper(bool enabled, const std::string & storage
   {
     rosbag2_storage::TopicMetadata topic_metadata_det;
     topic_metadata_det.name = "/perception/object_recognition/detection/objects";
-    topic_metadata_det.type = "autoware_perception_msgs/msg/DetectedObjects";
+    topic_metadata_det.type = "perception_msgs/msg/ObjectList";
     topic_metadata_det.serialization_format = serialization_format;
     writer_->create_topic(topic_metadata_det);
   }
@@ -180,7 +126,7 @@ RosbagWriterHelper::RosbagWriterHelper(bool enabled, const std::string & storage
   {
     rosbag2_storage::TopicMetadata topic_metadata_rec;
     topic_metadata_rec.name = "/perception/object_recognition/tracking/objects";
-    topic_metadata_rec.type = "autoware_perception_msgs/msg/TrackedObjects";
+    topic_metadata_rec.type = "perception_msgs/msg/ObjectList";
     topic_metadata_rec.serialization_format = serialization_format;
     writer_->create_topic(topic_metadata_rec);
   }

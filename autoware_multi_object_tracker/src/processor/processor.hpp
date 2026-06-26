@@ -24,8 +24,7 @@
 #include <autoware_utils_debug/time_keeper.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include "autoware_perception_msgs/msg/detected_objects.hpp"
-#include "autoware_perception_msgs/msg/tracked_objects.hpp"
+#include <perception_msgs/msg/object_list.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 
 #include <list>
@@ -58,14 +57,12 @@ public:
 
   // Output processes
   void getTrackedObjects(
-    const rclcpp::Time & time,
-    autoware_perception_msgs::msg::TrackedObjects & tracked_objects) const;
+    const rclcpp::Time & time, perception_msgs::msg::ObjectList & tracked_objects) const;
   void getTentativeObjects(
-    const rclcpp::Time & time,
-    autoware_perception_msgs::msg::TrackedObjects & tentative_objects) const;
+    const rclcpp::Time & time, perception_msgs::msg::ObjectList & tentative_objects) const;
   void getMergedObjects(
     const rclcpp::Time & time, const geometry_msgs::msg::Transform & tf_base_to_world,
-    autoware_perception_msgs::msg::DetectedObjects & merged_objects) const;
+    perception_msgs::msg::ObjectList & merged_objects) const;
 
   void setTimeKeeper(std::shared_ptr<autoware_utils_debug::TimeKeeper> time_keeper_ptr);
 

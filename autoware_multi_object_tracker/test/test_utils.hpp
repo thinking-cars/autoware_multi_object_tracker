@@ -22,7 +22,7 @@
 #include <rosbag2_cpp/writers/sequential_writer.hpp>
 #include <rosbag2_storage/serialized_bag_message.hpp>
 
-#include <autoware_perception_msgs/msg/detected_objects.hpp>
+#include <perception_msgs/msg/object_list.hpp>
 
 #include <algorithm>
 #include <array>
@@ -120,7 +120,7 @@ void printFrameStats(
   int frame, int detection_size, int num_trackers0, int num_trackers2, int num_pruned,
   int num_spawned, const FunctionTimings & timings);
 
-autoware_perception_msgs::msg::DetectedObjects toDetectedObjectsMsg(
+perception_msgs::msg::ObjectList toDetectedObjectsMsg(
   const autoware::multi_object_tracker::types::DynamicObjectList & dyn_objects);
 
 class RosbagWriterHelper

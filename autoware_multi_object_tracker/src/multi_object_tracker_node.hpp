@@ -24,9 +24,9 @@
 #include <autoware_utils_debug/time_keeper.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include "autoware_perception_msgs/msg/detected_objects.hpp"
-#include "autoware_perception_msgs/msg/tracked_objects.hpp"
 #include <nav_msgs/msg/odometry.hpp>
+#include <perception_msgs/msg/object_list.hpp>
+#include <perception_msgs_utils/object_access.hpp>
 
 #include <memory>
 #include <vector>
@@ -41,12 +41,12 @@ public:
 
 private:
   // ROS interface
-  std::vector<AUTOWARE_SUBSCRIPTION_PTR(autoware_perception_msgs::msg::DetectedObjects)>
+  std::vector<AUTOWARE_SUBSCRIPTION_PTR(perception_msgs::msg::ObjectList)>
     sub_objects_array_{};
   AUTOWARE_SUBSCRIPTION_PTR(nav_msgs::msg::Odometry) sub_odometry_ {};
 
-  AUTOWARE_PUBLISHER_PTR(autoware_perception_msgs::msg::TrackedObjects) tracked_objects_pub_;
-  AUTOWARE_PUBLISHER_PTR(autoware_perception_msgs::msg::DetectedObjects) merged_objects_pub_;
+  AUTOWARE_PUBLISHER_PTR(perception_msgs::msg::ObjectList) tracked_objects_pub_;
+  AUTOWARE_PUBLISHER_PTR(perception_msgs::msg::ObjectList) merged_objects_pub_;
 
   AUTOWARE_PUBLISHER_PTR(autoware_utils_debug::ProcessingTimeDetail)
   detailed_processing_time_publisher_;
@@ -70,7 +70,7 @@ private:
   void processObjects();
   void onMeasurement(
     const size_t channel_index,
-    AUTOWARE_MESSAGE_CONST_SHARED_PTR(autoware_perception_msgs::msg::DetectedObjects) msg);
+    AUTOWARE_MESSAGE_CONST_SHARED_PTR(perception_msgs::msg::ObjectList) msg);
 
   // publish processes
   void publish();

@@ -21,7 +21,7 @@
 
 #include <tf2/transform_datatypes.hpp>
 
-#include <autoware_perception_msgs/msg/tracked_objects.hpp>
+#include <perception_msgs/msg/object_list.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include <algorithm>
@@ -237,7 +237,7 @@ void TrackerProcessor::removeOldTracker(const rclcpp::Time & time)
 }
 
 void TrackerProcessor::getTrackedObjects(
-  const rclcpp::Time & time, autoware_perception_msgs::msg::TrackedObjects & tracked_objects) const
+  const rclcpp::Time & time, perception_msgs::msg::ObjectList & tracked_objects) const
 {
   std::unique_ptr<ScopedTimeTrack> st_ptr;
   if (time_keeper_) st_ptr = std::make_unique<ScopedTimeTrack>(__func__, *time_keeper_);
@@ -250,14 +250,13 @@ void TrackerProcessor::getTrackedObjects(
     if (tracker->getTrackedObject(time, tracked_object, to_publish)) {
       tracked_object.existence_probability = tracker->getTotalExistenceProbability();
       tracked_object.classification = tracker->getClassification();
-      tracked_objects.objects.push_back(types::toTrackedObjectMsg(tracked_object));
+      tracked_objects.objects.push_back(types::toObjectMsg(tracked_object));
     }
   }
 }
 
 void TrackerProcessor::getTentativeObjects(
-  const rclcpp::Time & time,
-  autoware_perception_msgs::msg::TrackedObjects & tentative_objects) const
+  const rclcpp::Time & time, perception_msgs::msg::ObjectList & tentative_objects) const
 {
   std::unique_ptr<ScopedTimeTrack> st_ptr;
   if (time_keeper_) st_ptr = std::make_unique<ScopedTimeTrack>(__func__, *time_keeper_);
@@ -268,15 +267,17 @@ void TrackerProcessor::getTentativeObjects(
     if (tracker->isConfident(adaptive_threshold_cache_, getEgoPose(), std::nullopt)) continue;
     constexpr bool to_publish = false;
     if (tracker->getTrackedObject(time, tracked_object, to_publish)) {
-      tentative_objects.objects.push_back(types::toTrackedObjectMsg(tracked_object));
+      tentative_objects.objects.push_back(types::toObjectMsg(tracked_object));
     }
   }
 }
 
 void TrackerProcessor::getMergedObjects(
   const rclcpp::Time & time, const geometry_msgs::msg::Transform & tf_base_to_world,
-  autoware_perception_msgs::msg::DetectedObjects & merged_objects) const
+  perception_msgs::msg::ObjectList & merged_objects) const
 {
+  using namespace perception_msgs::object_access;
+
   std::unique_ptr<ScopedTimeTrack> st_ptr;
   if (time_keeper_) st_ptr = std::make_unique<ScopedTimeTrack>(__func__, *time_keeper_);
 
@@ -287,19 +288,23 @@ void TrackerProcessor::getMergedObjects(
   for (const auto & tracker : list_tracker_) {
     constexpr bool to_publish = false;
     if (tracker->getTrackedObject(time, tracked_object, to_publish)) {
-      merged_objects.objects.push_back(types::toDetectedObjectMsg(tracked_object));
+      merged_objects.objects.push_back(types::toObjectMsg(tracked_object));
     }
   }
 
-  // Transform poses from world frame to ego frame using the inverse of tf_base_to_world
+  // Transform positions from world frame to ego frame using the inverse of tf_base_to_world
   tf2::Transform tf2_base_to_world;
   tf2::fromMsg(tf_base_to_world, tf2_base_to_world);
   geometry_msgs::msg::TransformStamped ts;
   ts.transform = tf2::toMsg(tf2_base_to_world.inverse());
 
   for (auto & obj : merged_objects.objects) {
-    tf2::doTransform(
-      obj.kinematics.pose_with_covariance.pose, obj.kinematics.pose_with_covariance.pose, ts);
+    geometry_msgs::msg::Point pos;
+    pos.x = getX(obj.state);
+    pos.y = getY(obj.state);
+    pos.z = getZ(obj.state);
+    tf2::doTransform(pos, pos, ts);
+    setPosition(obj.state, pos, false);
   }
 }
 

@@ -51,7 +51,7 @@ void TrackerDebugger::init(autoware::agnocast_wrapper::Node & node)
 
   if (debug_settings_.publish_tentative_objects) {
     debug_tentative_objects_pub_ =
-      node.create_publisher<autoware_perception_msgs::msg::TrackedObjects>(
+      node.create_publisher<perception_msgs::msg::ObjectList>(
         "~/debug/tentative_objects", rclcpp::QoS{1});
   }
 
@@ -112,7 +112,7 @@ void TrackerDebugger::updateDiagnosticValues(double min_extrapolation_time, size
 }
 
 void TrackerDebugger::publishTentativeObjects(
-  const autoware_perception_msgs::msg::TrackedObjects & tentative_objects) const
+  const perception_msgs::msg::ObjectList & tentative_objects) const
 {
   if (debug_settings_.publish_tentative_objects) {
     debug_tentative_objects_pub_->publish(tentative_objects);

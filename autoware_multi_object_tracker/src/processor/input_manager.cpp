@@ -67,9 +67,9 @@ void InputStream::push(
 }
 
 std::optional<types::DynamicObjectList> InputStream::processMessage(
-  AUTOWARE_MESSAGE_CONST_SHARED_PTR(autoware_perception_msgs::msg::DetectedObjects) msg)
+  AUTOWARE_MESSAGE_CONST_SHARED_PTR(perception_msgs::msg::ObjectList) msg)
 {
-  const autoware_perception_msgs::msg::DetectedObjects & objects = *msg;
+  const perception_msgs::msg::ObjectList & objects = *msg;
   const rclcpp::Time timestamp = objects.header.stamp;
 
   types::DynamicObjectList dynamic_objects = types::toDynamicObjectList(objects, channel_.index);
@@ -92,16 +92,6 @@ std::optional<types::DynamicObjectList> InputStream::processMessage(
     return std::nullopt;
   }
   dynamic_objects = transformed_objects.value();
-
-  // object shape processing
-  for (auto & object : dynamic_objects.objects) {
-    // check object shape type, bounding box, cylinder, polygon
-    const auto object_type = object.shape.type;
-    if (object_type == autoware_perception_msgs::msg::Shape::CYLINDER) {
-      // convert cylinder dimension to bounding box dimension
-      object.shape.dimensions.y = object.shape.dimensions.x;
-    }
-  }
 
   // Normalize the object uncertainty
   uncertainty::normalizeUncertainty(dynamic_objects);
@@ -276,7 +266,7 @@ void InputManager::push(
 
 std::optional<types::DynamicObjectList> InputManager::processMessage(
   const size_t channel_index,
-  AUTOWARE_MESSAGE_CONST_SHARED_PTR(autoware_perception_msgs::msg::DetectedObjects) msg)
+  AUTOWARE_MESSAGE_CONST_SHARED_PTR(perception_msgs::msg::ObjectList) msg)
 {
   if (channel_index >= input_streams_.size()) {
     RCLCPP_WARN(

@@ -131,18 +131,18 @@ bool should_publish(
   return should_publish;
 }
 
-autoware_perception_msgs::msg::TrackedObjects get_tracked_objects_(
+perception_msgs::msg::ObjectList get_tracked_objects_(
   const rclcpp::Time & object_time, const MultiObjectTrackerParameters & params,
   const MultiObjectTrackerInternalState & state)
 {
-  autoware_perception_msgs::msg::TrackedObjects tracked_objects;
+  perception_msgs::msg::ObjectList tracked_objects;
   tracked_objects.header.frame_id = params.world_frame_id;
   state.processor->getTrackedObjects(object_time, tracked_objects);
 
   return tracked_objects;
 }
 
-std::optional<autoware_perception_msgs::msg::DetectedObjects> get_merged_objects_(
+std::optional<perception_msgs::msg::ObjectList> get_merged_objects_(
   const rclcpp::Time & object_time, const MultiObjectTrackerParameters & params,
   const MultiObjectTrackerInternalState & state, const rclcpp::Logger & logger)
 {
@@ -154,7 +154,7 @@ std::optional<autoware_perception_msgs::msg::DetectedObjects> get_merged_objects
 
   const auto tf_base_to_world = state.odometry->getTransform(last_tracker_time);
   if (tf_base_to_world) {
-    autoware_perception_msgs::msg::DetectedObjects merged_output_msg;
+    perception_msgs::msg::ObjectList merged_output_msg;
     state.processor->getMergedObjects(object_time, *tf_base_to_world, merged_output_msg);
     merged_output_msg.header.frame_id = params.ego_frame_id;
     return merged_output_msg;
@@ -169,7 +169,7 @@ std::optional<autoware_perception_msgs::msg::DetectedObjects> get_merged_objects
 //// Low-level processing functions
 MeasurementProcessingResult process_measurement(
   const size_t channel_index,
-  AUTOWARE_MESSAGE_CONST_SHARED_PTR(autoware_perception_msgs::msg::DetectedObjects) msg,
+  AUTOWARE_MESSAGE_CONST_SHARED_PTR(perception_msgs::msg::ObjectList) msg,
   const rclcpp::Time & current_time, MultiObjectTrackerInternalState & state,
   TrackerDebugger & debugger)
 {
@@ -343,7 +343,7 @@ OptionalPublishingData prepare_optional_publishing_data(
 
   // Prepare tentative objects
   if (debugger.shouldPublishTentativeObjects()) {
-    autoware_perception_msgs::msg::TrackedObjects tentative_objects;
+    perception_msgs::msg::ObjectList tentative_objects;
     tentative_objects.header.frame_id = params.world_frame_id;
     state.processor->getTentativeObjects(object_time, tentative_objects);
     result.tentative_objects = std::move(tentative_objects);

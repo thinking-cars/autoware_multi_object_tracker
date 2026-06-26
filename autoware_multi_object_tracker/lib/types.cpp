@@ -16,6 +16,11 @@
 
 #include "autoware/multi_object_tracker/object_model/uuid.hpp"
 
+#include <tf2/utils.h>
+
+#include <perception_msgs/msg/iscactr.hpp>
+#include <perception_msgs/msg/object_classification.hpp>
+
 #include <cmath>
 #include <vector>
 
@@ -25,87 +30,162 @@ namespace autoware::multi_object_tracker
 namespace types
 {
 
-OrientationAvailability convertOrientationAvailabilityFromMsg(int8_t msg_availability)
+namespace
 {
-  using autoware_perception_msgs::msg::DetectedObjectKinematics;
-  switch (msg_availability) {
-    case DetectedObjectKinematics::UNAVAILABLE:
-      return OrientationAvailability::UNAVAILABLE;
-    case DetectedObjectKinematics::SIGN_UNKNOWN:
-      return OrientationAvailability::SIGN_UNKNOWN;
-    case DetectedObjectKinematics::AVAILABLE:
-      return OrientationAvailability::AVAILABLE;
+
+// Map perception_msgs ObjectClassification type → internal classes::Label
+classes::Label toInternalLabel(const uint8_t perception_type)
+{
+  using Cls = perception_msgs::msg::ObjectClassification;
+  switch (perception_type) {
+    case Cls::PEDESTRIAN:
+    case Cls::VRU:
+      return classes::Label::PEDESTRIAN;
+    case Cls::BICYCLE:
+    case Cls::MICRO:
+      return classes::Label::BICYCLE;
+    case Cls::MOTORCYCLE:
+      return classes::Label::MOTORCYCLE;
+    case Cls::CAR:
+      return classes::Label::CAR;
+    case Cls::UTILITY:
+      return classes::Label::TRUCK;
+    case Cls::BUS:
+      return classes::Label::BUS;
+    case Cls::ANIMAL:
+      return classes::Label::ANIMAL;
+    case Cls::UNCLASSIFIED:
+    case Cls::UNKNOWN:
     default:
-      return OrientationAvailability::UNAVAILABLE;
+      return classes::Label::UNKNOWN;
   }
 }
 
-int8_t convertOrientationAvailabilityToMsg(OrientationAvailability availability)
+// Map internal classes::Label → perception_msgs ObjectClassification type
+uint8_t toPerceptionType(const classes::Label label)
 {
-  using autoware_perception_msgs::msg::DetectedObjectKinematics;
-  switch (availability) {
-    case OrientationAvailability::UNAVAILABLE:
-      return DetectedObjectKinematics::UNAVAILABLE;
-    case OrientationAvailability::SIGN_UNKNOWN:
-      return DetectedObjectKinematics::SIGN_UNKNOWN;
-    case OrientationAvailability::AVAILABLE:
-      return DetectedObjectKinematics::AVAILABLE;
+  using Cls = perception_msgs::msg::ObjectClassification;
+  switch (label) {
+    case classes::Label::PEDESTRIAN:
+      return Cls::PEDESTRIAN;
+    case classes::Label::BICYCLE:
+      return Cls::BICYCLE;
+    case classes::Label::MOTORCYCLE:
+      return Cls::MOTORCYCLE;
+    case classes::Label::CAR:
+      return Cls::CAR;
+    case classes::Label::TRUCK:
+    case classes::Label::TRAILER:
+      return Cls::UTILITY;
+    case classes::Label::BUS:
+      return Cls::BUS;
+    case classes::Label::ANIMAL:
+      return Cls::ANIMAL;
+    case classes::Label::UNKNOWN:
+    case classes::Label::HAZARD:
+    case classes::Label::OVER_DRIVABLE:
+    case classes::Label::UNDER_DRIVABLE:
     default:
-      return DetectedObjectKinematics::UNAVAILABLE;
+      return Cls::UNKNOWN;
   }
 }
+
+std::vector<classes::Classification> toClassificationsFromPerceptionMsgs(
+  const std::vector<perception_msgs::msg::ObjectClassification> & classifications)
+{
+  std::vector<classes::Classification> result;
+  result.reserve(classifications.size());
+  for (const auto & c : classifications) {
+    result.push_back({toInternalLabel(c.type), static_cast<float>(c.probability)});
+  }
+  return result;
+}
+
+std::vector<perception_msgs::msg::ObjectClassification> toPerceptionClassificationMsgs(
+  const std::vector<classes::Classification> & classifications)
+{
+  std::vector<perception_msgs::msg::ObjectClassification> result;
+  result.reserve(classifications.size());
+  for (const auto & c : classifications) {
+    perception_msgs::msg::ObjectClassification msg;
+    msg.type = toPerceptionType(c.label);
+    msg.probability = static_cast<double>(c.probability);
+    result.push_back(msg);
+  }
+  return result;
+}
+
+}  // namespace
 
 DynamicObject toDynamicObject(
-  const autoware_perception_msgs::msg::DetectedObject & det_object, const uint channel_index)
+  const perception_msgs::msg::Object & obj, const uint channel_index)
 {
+  using namespace perception_msgs::object_access;
+
   DynamicObject dynamic_object;
 
   // Always generate UUID for consistency (shared generator across the package).
   dynamic_object.uuid = object_model::generate_uuid();
 
-  // initialize existence_probabilities, using channel information
+  // Existence probability
   dynamic_object.channel_index = channel_index;
-  if (det_object.existence_probability < 1e-6) {
-    // given existence probability is too low, may the value is not set
+  if (obj.existence_probability < 1e-6) {
     dynamic_object.existence_probability = default_existence_probability;
-  } else if (det_object.existence_probability > 0.999) {
-    // given existence probability is too high, may the value is not set
+  } else if (obj.existence_probability > 0.999) {
     dynamic_object.existence_probability = 0.999;
   } else {
-    dynamic_object.existence_probability = det_object.existence_probability;
+    dynamic_object.existence_probability = obj.existence_probability;
   }
   dynamic_object.existence_probabilities.push_back(
     {channel_index, dynamic_object.existence_probability});
 
-  dynamic_object.classification = classes::toClassifications(det_object.classification);
+  // Classification
+  dynamic_object.classification =
+    toClassificationsFromPerceptionMsgs(obj.state.classifications);
 
-  dynamic_object.pose = det_object.kinematics.pose_with_covariance.pose;
-  dynamic_object.pose_covariance = det_object.kinematics.pose_with_covariance.covariance;
-  dynamic_object.twist = det_object.kinematics.twist_with_covariance.twist;
-  dynamic_object.twist_covariance = det_object.kinematics.twist_with_covariance.covariance;
+  // Pose (getPoseCovariance returns a zero-initialized vector, avoiding uninitialized warnings)
+  dynamic_object.pose = getPose(obj.state);
+  const auto pose_cov_vec = getPoseCovariance(obj.state);
+  std::copy(pose_cov_vec.begin(), pose_cov_vec.end(), dynamic_object.pose_covariance.begin());
 
-  dynamic_object.kinematics.has_position_covariance = det_object.kinematics.has_position_covariance;
-  dynamic_object.kinematics.orientation_availability =
-    convertOrientationAvailabilityFromMsg(det_object.kinematics.orientation_availability);
-  dynamic_object.kinematics.has_twist = det_object.kinematics.has_twist;
-  dynamic_object.kinematics.has_twist_covariance = det_object.kinematics.has_twist_covariance;
+  // Velocity: XYZ in header frame (rotated from object-frame lon/lat using yaw)
+  const auto vel_xyz = getVelocityXYZ(obj.state);
+  dynamic_object.twist.linear = vel_xyz;
 
-  // shape
-  dynamic_object.shape = det_object.shape;
-  dynamic_object.area = getArea(det_object.shape);
+  // Twist covariance — extract the 2×2 XY block from the velocity covariance
+  const auto vel_with_cov = getVelocityXYZWithCovariance(obj.state);
+  dynamic_object.twist_covariance.fill(0.0);
+  dynamic_object.twist_covariance[0] = vel_with_cov.covariance[0];   // var(vx,vx)
+  dynamic_object.twist_covariance[1] = vel_with_cov.covariance[1];   // cov(vx,vy)
+  dynamic_object.twist_covariance[6] = vel_with_cov.covariance[6];   // cov(vy,vx)
+  dynamic_object.twist_covariance[7] = vel_with_cov.covariance[7];   // var(vy,vy)
+
+  // Kinematics flags
+  dynamic_object.kinematics.has_position_covariance = true;
+  dynamic_object.kinematics.orientation_availability = OrientationAvailability::AVAILABLE;
+  dynamic_object.kinematics.has_twist = true;
+  dynamic_object.kinematics.has_twist_covariance = true;
+  dynamic_object.kinematics.is_stationary = false;
+
+  // Shape — ISCACTR stores WIDTH(y), LENGTH(x), HEIGHT(z)
+  dynamic_object.shape.type = autoware_perception_msgs::msg::Shape::BOUNDING_BOX;
+  dynamic_object.shape.dimensions.x = getLength(obj.state);
+  dynamic_object.shape.dimensions.y = getWidth(obj.state);
+  dynamic_object.shape.dimensions.z = getHeight(obj.state);
+  dynamic_object.area = getArea(dynamic_object.shape);
 
   return dynamic_object;
 }
 
 DynamicObjectList toDynamicObjectList(
-  const autoware_perception_msgs::msg::DetectedObjects & det_objects, const uint channel_index)
+  const perception_msgs::msg::ObjectList & obj_list, const uint channel_index)
 {
   DynamicObjectList dynamic_objects;
-  dynamic_objects.header = det_objects.header;
+  dynamic_objects.header = obj_list.header;
   dynamic_objects.channel_index = channel_index;
-  dynamic_objects.objects.reserve(det_objects.objects.size());
-  for (const auto & det_object : det_objects.objects) {
-    dynamic_objects.objects.emplace_back(toDynamicObject(det_object, channel_index));
+  dynamic_objects.objects.reserve(obj_list.objects.size());
+  for (const auto & obj : obj_list.objects) {
+    dynamic_objects.objects.emplace_back(toDynamicObject(obj, channel_index));
   }
   dynamic_objects.buildUuidIndex();
   return dynamic_objects;
@@ -133,48 +213,48 @@ std::optional<size_t> DynamicObjectList::getObjectIndexByUuid(
   return std::nullopt;
 }
 
-autoware_perception_msgs::msg::TrackedObject toTrackedObjectMsg(const DynamicObject & dyn_object)
+perception_msgs::msg::Object toObjectMsg(const DynamicObject & dyn_object)
 {
-  autoware_perception_msgs::msg::TrackedObject tracked_object;
-  tracked_object.object_id = dyn_object.uuid;
-  tracked_object.existence_probability = dyn_object.existence_probability;
-  tracked_object.classification = classes::toClassificationMsgs(dyn_object.classification);
+  using namespace perception_msgs::object_access;
+  using perception_msgs::msg::ISCACTR;
 
-  tracked_object.kinematics.pose_with_covariance.pose = dyn_object.pose;
-  tracked_object.kinematics.pose_with_covariance.covariance = dyn_object.pose_covariance;
-  tracked_object.kinematics.twist_with_covariance.twist = dyn_object.twist;
-  tracked_object.kinematics.twist_with_covariance.covariance = dyn_object.twist_covariance;
+  perception_msgs::msg::Object obj;
 
-  tracked_object.kinematics.orientation_availability =
-    convertOrientationAvailabilityToMsg(dyn_object.kinematics.orientation_availability);
+  // Encode UUID as uint64 using the first 8 bytes
+  uint64_t id = 0;
+  for (int i = 0; i < 8; ++i) {
+    id |= static_cast<uint64_t>(dyn_object.uuid.uuid[i]) << (56 - 8 * i);
+  }
+  obj.id = id;
 
-  tracked_object.kinematics.is_stationary = dyn_object.kinematics.is_stationary;
+  obj.existence_probability = dyn_object.existence_probability;
 
-  tracked_object.shape = dyn_object.shape;
+  // Initialize ISCACTR state (zeros all fields, sets covariance to INVALID)
+  initializeState(obj.state, ISCACTR::MODEL_ID);
 
-  return tracked_object;
-}
+  // Position
+  setPosition(obj.state, dyn_object.pose.position, false);
 
-autoware_perception_msgs::msg::DetectedObject toDetectedObjectMsg(const DynamicObject & dyn_object)
-{
-  autoware_perception_msgs::msg::DetectedObject detected_object;
-  detected_object.existence_probability = dyn_object.existence_probability;
-  detected_object.classification = classes::toClassificationMsgs(dyn_object.classification);
+  // Pose covariance (position + orientation)
+  setPoseCovariance(obj.state, dyn_object.pose_covariance);
 
-  detected_object.kinematics.pose_with_covariance.pose = dyn_object.pose;
-  detected_object.kinematics.pose_with_covariance.covariance = dyn_object.pose_covariance;
-  detected_object.kinematics.twist_with_covariance.twist = dyn_object.twist;
-  detected_object.kinematics.twist_with_covariance.covariance = dyn_object.twist_covariance;
+  // Yaw and velocity (XYZ → lon/lat using yaw)
+  const double yaw = tf2::getYaw(dyn_object.pose.orientation);
+  const double var_vx = dyn_object.twist_covariance[0];
+  const double cov_vxy = dyn_object.twist_covariance[1];
+  const double var_vy = dyn_object.twist_covariance[7];
+  setVelocityXYZYawWithCovariance(
+    obj.state, dyn_object.twist.linear, yaw, var_vx, var_vy, cov_vxy);
 
-  detected_object.kinematics.orientation_availability =
-    convertOrientationAvailabilityToMsg(dyn_object.kinematics.orientation_availability);
-  detected_object.kinematics.has_position_covariance = true;
-  detected_object.kinematics.has_twist = true;
-  detected_object.kinematics.has_twist_covariance = true;
+  // Dimensions — shape.dimensions.x=length, .y=width, .z=height for BOUNDING_BOX
+  setLength(obj.state, dyn_object.shape.dimensions.x, false);
+  setWidth(obj.state, dyn_object.shape.dimensions.y, false);
+  setHeight(obj.state, dyn_object.shape.dimensions.z, false);
 
-  detected_object.shape = dyn_object.shape;
+  // Classification
+  obj.state.classifications = toPerceptionClassificationMsgs(dyn_object.classification);
 
-  return detected_object;
+  return obj;
 }
 
 double getArea(const autoware_perception_msgs::msg::Shape & shape)

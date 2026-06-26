@@ -21,11 +21,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <autoware_perception_msgs/msg/detected_objects.hpp>
-#include <autoware_perception_msgs/msg/object_classification.hpp>
-#include <autoware_perception_msgs/msg/shape.hpp>
-#include <autoware_perception_msgs/msg/tracked_object.hpp>
-#include <autoware_perception_msgs/msg/tracked_objects.hpp>
+#include <perception_msgs/msg/object_list.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include <gtest/gtest.h>
@@ -136,7 +132,7 @@ FunctionTimings runIterationsAssociation(
       1000.0;
     timings.total.times.push_back(total_duration);
 
-    autoware_perception_msgs::msg::TrackedObjects latest_tracked_objects;
+    perception_msgs::msg::ObjectList latest_tracked_objects;
     processor->getTrackedObjects(current_time, latest_tracked_objects);
 
     latest_tracked_objects.header.frame_id = "map";
@@ -218,7 +214,7 @@ FunctionTimings runIterations(
         timings);
     }
 
-    autoware_perception_msgs::msg::TrackedObjects latest_tracked_objects;
+    perception_msgs::msg::ObjectList latest_tracked_objects;
     processor->getTrackedObjects(current_time, latest_tracked_objects);
 
     latest_tracked_objects.header.frame_id = "map";
@@ -288,7 +284,7 @@ void runPerformanceTestWithRosbag(const std::string & rosbag_path, bool write_ba
     std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME));
 
   // Create serialization objects
-  rclcpp::Serialization<autoware_perception_msgs::msg::DetectedObjects> detection_serialization;
+  rclcpp::Serialization<perception_msgs::msg::ObjectList> detection_serialization;
   rclcpp::Serialization<tf2_msgs::msg::TFMessage> tf_serialization;
 
   while (reader.hasNext()) {
@@ -308,8 +304,8 @@ void runPerformanceTestWithRosbag(const std::string & rosbag_path, bool write_ba
 
       // Deserialize message
       rclcpp::SerializedMessage serialized_msg(*bag_message->serialized_data);
-      autoware_perception_msgs::msg::DetectedObjects::SharedPtr msg =
-        std::make_shared<autoware_perception_msgs::msg::DetectedObjects>();
+      perception_msgs::msg::ObjectList::SharedPtr msg =
+        std::make_shared<perception_msgs::msg::ObjectList>();
       detection_serialization.deserialize_message(&serialized_msg, msg.get());
       msg->header.frame_id = "base_link";  // Set frame_id to base_link for processing
 
@@ -343,8 +339,8 @@ void runPerformanceTestWithRosbag(const std::string & rosbag_path, bool write_ba
 
       // Get and output results
       rclcpp::Time current_time(msg->header.stamp);
-      autoware_perception_msgs::msg::TrackedObjects latest_tracked_objects;
-      autoware_perception_msgs::msg::DetectedObjects latest_detected_objects;
+      perception_msgs::msg::ObjectList latest_tracked_objects;
+      perception_msgs::msg::ObjectList latest_detected_objects;
       processor->getTrackedObjects(current_time, latest_tracked_objects);
       latest_detected_objects = toDetectedObjectsMsg(dynamic_objects);
       auto stamp = rclcpp::Time(msg->header.stamp);

@@ -270,10 +270,10 @@ MultiObjectTracker::MultiObjectTracker(const rclcpp::NodeOptions & node_options)
     std::string input_channel_topic = oss.str();
 
     sub_objects_array_.at(index) =
-      create_subscription<autoware_perception_msgs::msg::DetectedObjects>(
+      create_subscription<perception_msgs::msg::ObjectList>(
         input_channel_topic, rclcpp::QoS{1},
         [this,
-         index](AUTOWARE_MESSAGE_CONST_SHARED_PTR(autoware_perception_msgs::msg::DetectedObjects)
+         index](AUTOWARE_MESSAGE_CONST_SHARED_PTR(perception_msgs::msg::ObjectList)
                   msg) { this->onMeasurement(index, std::move(msg)); });
   }
 
@@ -287,11 +287,11 @@ MultiObjectTracker::MultiObjectTracker(const rclcpp::NodeOptions & node_options)
   }
 
   // publishers
-  tracked_objects_pub_ = create_publisher<autoware_perception_msgs::msg::TrackedObjects>(
+  tracked_objects_pub_ = create_publisher<perception_msgs::msg::ObjectList>(
     "~/output/objects", rclcpp::QoS{1});
   if (params_.publish_merged_objects) {
     // if the input is multi-channel, export fused merged (detected) objects
-    merged_objects_pub_ = create_publisher<autoware_perception_msgs::msg::DetectedObjects>(
+    merged_objects_pub_ = create_publisher<perception_msgs::msg::ObjectList>(
       "~/output/merged_objects", rclcpp::QoS{1});
   }
 
@@ -325,7 +325,7 @@ MultiObjectTracker::MultiObjectTracker(const rclcpp::NodeOptions & node_options)
 
 void MultiObjectTracker::onMeasurement(
   const size_t channel_index,
-  AUTOWARE_MESSAGE_CONST_SHARED_PTR(autoware_perception_msgs::msg::DetectedObjects) msg)
+  AUTOWARE_MESSAGE_CONST_SHARED_PTR(perception_msgs::msg::ObjectList) msg)
 {
   std::unique_ptr<ScopedTimeTrack> st_ptr;
   if (time_keeper_) st_ptr = std::make_unique<ScopedTimeTrack>(__func__, *time_keeper_);
