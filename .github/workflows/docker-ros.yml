@@ -21,6 +21,7 @@ jobs:
           target: dev,run
           base-image: rwthika/ros2:jazzy
           rmw-implementation: rmw_zenoh_cpp
+          enable-recursive-vcs-import: false
           command: ros2 launch autoware_multi_object_tracker multi_object_tracker.launch.xml
           label-maintainer: Raphael van Kempen <vankempen@thinking-cars.de>
           label-authors: Raphael van Kempen <vankempen@thinking-cars.de>
