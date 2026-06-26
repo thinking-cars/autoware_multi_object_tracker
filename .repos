@@ -22,7 +22,7 @@ repositories:
   autoware_core:
     type: git
     url: https://github.com/autowarefoundation/autoware_core.git
-    version: 78a358b35bc8b2b3e6df2c4a34a89a2e72e0e2bf
+    version: 78a358b35bc88f89abfe05c86b01b543991d098e
   mussp:
     type: git
     url: https://github.com/tier4/muSSP.git
