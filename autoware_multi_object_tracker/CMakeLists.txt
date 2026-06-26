@@ -6,6 +6,8 @@ autoware_package()
 
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(perception_msgs REQUIRED)
+find_package(perception_msgs_utils REQUIRED)
 
 # Ignore -Wnonportable-include-path in Clang for mussp
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -83,6 +85,8 @@ target_link_libraries(${PROJECT_NAME}
   Eigen3::Eigen
   tf2::tf2
   tf2_geometry_msgs::tf2_geometry_msgs
+  ${perception_msgs_LIBRARIES}
+  ${perception_msgs_utils_LIBRARIES}
 )
 
 autoware_agnocast_wrapper_register_node(${PROJECT_NAME}

@@ -22,6 +22,8 @@
   <depend>diagnostic_updater</depend>
   <depend>eigen</depend>
   <depend>mussp</depend>
+  <depend>perception_msgs</depend>
+  <depend>perception_msgs_utils</depend>
   <depend>nav_msgs</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
