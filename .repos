@@ -1,8 +1,8 @@
 repositories:
   perception_interfaces:
     type: git
-    url: https://github.com/ika-rwth-aachen/perception_interfaces.git
-    version: v1.1.0
+    url: https://github.com/RaphvK/perception_interfaces.git
+    version: camera2d
   autoware_cmake:
     type: git
     url: https://github.com/autowarefoundation/autoware_cmake.git
