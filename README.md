@@ -13,6 +13,8 @@
 
 This repository integrates the [autoware_multi_object_tracker](https://github.com/autowarefoundation/autoware_universe/tree/e18a5311e509574326ae0ff6256108326a8132d0/perception/autoware_multi_object_tracker) package for multi-object tracking from [Autoware Universe](https://github.com/autowarefoundation/autoware_universe) into the [OpenADS](https://github.com/openads-project) ecosystem, which emphasizes a modular microservice architecture. Hence, this repository is self-contained and includes only the necessary dependencies.
 
+> This` repository is a prototypical integration into openADS for testing and benchmarking purposes. Thus, only necessary changes were made for integration without adopting the Autoware module to the openADS coding guidelines. These adoptions will only be made in case of a full openADS integration after testing and benchmarking. 
+
 <p align="center">
   <strong>🚀 <a href="#-quick-start">Quick Start</a></strong> • <strong>💻 <a href="#-development">Development</a></strong> • <strong>📝 <a href="#-documentation">Documentation</a></strong>
 </p>
@@ -84,4 +86,4 @@ The source code in this repository is licensed under Apache-2.0, see [LICENSE](L
 
 ## 🙏 Acknowledgements
 
-This project is maintained by Thinking Cars. We acknowledge the work of the Autoware contributors and are happy to discuss potential collaborations.
+This project is maintained by [Thinking Cars](https://www.thinking-cars.de). We acknowledge the work of the [Autoware](https://autoware.org/) contributors and are happy to discuss potential collaborations.
