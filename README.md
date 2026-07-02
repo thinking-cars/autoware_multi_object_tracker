@@ -16,6 +16,10 @@ This repository integrates the [autoware_multi_object_tracker](https://github.co
 > [!IMPORTANT]
 > This repository is a prototypical integration of the `autoware_multi_object_tracker` into [OpenADS](https://github.com/openads-project) for testing and benchmarking purposes. Thus, only necessary changes were made for integration without adopting the Autoware module to the OpenADS consistency guidelines. These adoptions will only be made in case of a full integration into OpenADS after testing and benchmarking. 
 
+The following teaser shows **tracked objects (pink)** using the nuScenes dataset provided by [autonomy_datasets](https://github.com/thinking-cars/autonomy_datasets).
+
+![Teaser](./assets/teaser-nuscenes.gif)
+
 <p align="center">
   <strong>🚀 <a href="#-quick-start">Quick Start</a></strong> • <strong>💻 <a href="#-development">Development</a></strong> • <strong>📝 <a href="#-documentation">Documentation</a></strong>
 </p>
