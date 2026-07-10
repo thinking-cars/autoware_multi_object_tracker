@@ -8,6 +8,10 @@ on:
       - '**'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   compose-oci:
     uses: openads-project/openads-dev-environment/.github/workflows/compose-oci.yml@main
