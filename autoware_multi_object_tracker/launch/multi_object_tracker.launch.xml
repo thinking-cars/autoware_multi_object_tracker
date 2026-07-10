@@ -2,6 +2,18 @@
 <launch>
   <include file="$(find-pkg-share autoware_agnocast_wrapper)/launch/agnocast_env.launch.xml"/>
 
+  <arg name="name" default="multi_object_tracker" description="node name"/>
+  <arg name="namespace" default="" description="node namespace"/>
+  <arg
+    name="params"
+    default="$(find-pkg-share autoware_multi_object_tracker)/config/multi_object_tracker_node.param.yaml"
+    description="path to parameter file"
+  />
+  <arg
+    name="log_level"
+    default="info"
+    description="ROS logging level (debug, info, warn, error, fatal)"
+  />
   <arg name="input/detection01/objects" default="input/objects01"/>
   <arg name="input/detection02/objects" default="input/objects02"/>
   <arg name="input/detection03/objects" default="input/objects03"/>
@@ -30,14 +42,21 @@
   <arg name="input/detection10/channel" default="none"/>
   <arg name="input/detection11/channel" default="none"/>
   <arg name="input/detection12/channel" default="none"/>
-  <arg name="tracker_setting_path" default="$(find-pkg-share autoware_multi_object_tracker)/config/multi_object_tracker_node.param.yaml"/>
+  <arg name="tracker_setting_path" default="$(var params)"/>
   <arg name="data_association_matrix_path" default="$(find-pkg-share autoware_multi_object_tracker)/config/data_association_matrix.param.yaml"/>
   <arg name="input_channels_path" default="$(find-pkg-share autoware_multi_object_tracker)/config/input_channels.param.yaml"/>
   <arg name="publish_merged_objects" default="false"/>
   <arg name="ego_source" default="tf" description="ego pose source: tf (look up from TF tree) or odometry (interpolate from input/odometry)"/>
-  <arg name="use_sim_time" default="false"/>
+  <arg name="use_sim_time" default="false" description="use simulation clock"/>
 
-  <node pkg="autoware_multi_object_tracker" exec="multi_object_tracker_node" name="multi_object_tracker" output="both">
+  <node
+    pkg="autoware_multi_object_tracker"
+    exec="multi_object_tracker_node"
+    namespace="$(var namespace)"
+    name="$(var name)"
+    args="--ros-args --log-level $(var log_level)"
+    output="both"
+  >
     <env name="LD_PRELOAD" value="$(var ld_preload_value)"/>
     <remap from="~/input/detection01/objects" to="$(var input/detection01/objects)"/>
     <remap from="~/input/detection02/objects" to="$(var input/detection02/objects)"/>

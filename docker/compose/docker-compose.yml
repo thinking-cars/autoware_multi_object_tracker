@@ -1,32 +1,32 @@
 services:
 
-  openads-demo-module:
-    image: ghcr.io/openads-project/openads_demo_module:v1.0.0
+  autoware-multi-object-tracker:
+    image: ghcr.io/thinking-cars/autoware_multi_object_tracker:latest_refactoring_ci
     environment:
       # --- name ------
       NAMESPACE: /
-      NAME: openads_demo_module
+      NAME: autoware_multi_object_tracker
       # --- inputs ----
-      INPUT_TOPIC: ~/input
+      DETECTED_OBJECT_LIST_TOPIC: ~/detected_object_list
       # --- outputs ---
-      OUTPUT_TOPIC: ~/output
+      OBJECT_LIST_TOPIC: ~/object_list
       # --- other -----
       SERVICE_TOPIC: ~/service
       LOG_LEVEL: ${LOG_LEVEL:-info}
       USE_SIM_TIME: ${USE_SIM_TIME:-false}
-      PARAMS: ${PARAMS:-/docker-ros/ws/install/openads_demo_module/share/openads_demo_module/config/params.yml}
+      PARAMS: ${PARAMS:-/docker-ros/ws/install/autoware_multi_object_tracker/share/autoware_multi_object_tracker/config/multi_object_tracker_node.param.yaml}
     command:
       - /bin/bash
       - -ic
       - |
-        ros2 launch openads_demo_module openads_demo_module_launch.py \
+        ros2 launch autoware_multi_object_tracker multi_object_tracker.launch.xml \
           namespace:=$${NAMESPACE} \
           name:=$${NAME} \
           log_level:=$${LOG_LEVEL} \
           use_sim_time:=$${USE_SIM_TIME} \
           params:=$${PARAMS} \
-          input_topic:=$${INPUT_TOPIC} \
-          output_topic:=$${OUTPUT_TOPIC} \
-          service_topic:=$${SERVICE_TOPIC}
+          input/detection01/objects:=$${DETECTED_OBJECT_LIST_TOPIC} \
+          input/detection01/channel:="detected_objects" \
+          output/objects:=$${OBJECT_LIST_TOPIC}
     # volumes:
-    #   - ./params.yml:/docker-ros/ws/install/openads_demo_module/share/openads_demo_module/config/params.yml
+    #   - ./params.yml:/docker-ros/ws/install/autoware_multi_object_tracker/share/autoware_multi_object_tracker/config/multi_object_tracker_node.param.yaml
