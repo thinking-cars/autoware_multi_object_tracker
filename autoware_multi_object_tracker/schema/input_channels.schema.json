@@ -39,6 +39,11 @@
               "type": "boolean",
               "description": "Indicates if the input channel can trust the object orientation.",
               "default": true
+            },
+            "can_trust_velocity": {
+              "type": "boolean",
+              "description": "Indicates if the input channel provides a trustworthy object velocity/twist. If false, the tracker ignores input twist and estimates velocity from position measurements.",
+              "default": true
             }
           }
         },
