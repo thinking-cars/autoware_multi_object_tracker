@@ -25,5 +25,6 @@ services:
     environment:
       RMW_IMPLEMENTATION: rmw_fastrtps_cpp
       USE_SIM_TIME: true
-      INPUT_OBJECT_LIST_TOPIC_01: /object_list/lidar_01
-      OBJECTS_TOPIC: /object_list/tracked
+      INPUT_DETECTION01_OBJECTS: /object_list/lidar_01
+      INPUT_DETECTION01_CHANNEL: detected_objects
+      OUTPUT_OBJECTS: /object_list/tracked
