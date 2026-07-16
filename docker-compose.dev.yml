@@ -1,0 +1,15 @@
+services:
+
+  autonomy-datasets:
+    extends:
+      file: docker-compose.yml
+      service: autonomy-datasets
+
+  autoware-multi-object-tracker:
+    extends:
+      file: docker-compose.yml
+      service: autoware-multi-object-tracker
+    image: ghcr.io/thinking-cars/autoware_multi_object_tracker:latest-dev
+    command: sleep infinity
+    volumes:
+      - .:/docker-ros/ws/src/target
