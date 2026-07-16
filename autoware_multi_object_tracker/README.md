@@ -52,9 +52,9 @@ flowchart LR
 
 | Topic | Type | Description |
 | --- | --- | --- |
-| `~/output/objects` | `perception_msgs/msg/ObjectList` | TODO |
-| `~/output/merged_objects` | `perception_msgs/msg/ObjectList` | TODO |
-| `~/debug/processing_time_detail_ms` | `autoware_utils_debug/ProcessingTimeDetail` | TODO |
+| `~/output/objects` | `perception_msgs/msg/ObjectList` | Tracked objects |
+| `~/output/merged_objects` | `perception_msgs/msg/ObjectList` | Merged objects |
+| `~/debug/processing_time_detail_ms` | `autoware_utils_debug/ProcessingTimeDetail` | Processing time |
 | `~/debug/tentative_objects` | `perception_msgs/msg/ObjectList` | Tentative tracked objects; available when `publish_tentative_objects` is enabled. |
 | `~/debug/objects_markers` | `visualization_msgs/msg/MarkerArray` | Tracker, detection, association, and existence-probability markers; available when `publish_debug_markers` is enabled. |
 
@@ -64,28 +64,28 @@ flowchart LR
 
 | Argument | Default | Description |
 | --- | --- | --- |
-| `input_object_list_topic_01` | `"~/input/detection01/objects"` | TODO |
-| `input_object_list_topic_02` | `"~/input/detection02/objects"` | TODO |
-| `input_object_list_topic_03` | `"~/input/detection03/objects"` | TODO |
-| `input_object_list_topic_04` | `"~/input/detection04/objects"` | TODO |
-| `input_object_list_topic_05` | `"~/input/detection05/objects"` | TODO |
-| `input_object_list_topic_06` | `"~/input/detection06/objects"` | TODO |
-| `input_object_list_topic_07` | `"~/input/detection07/objects"` | TODO |
-| `input_object_list_topic_08` | `"~/input/detection08/objects"` | TODO |
-| `input_object_list_topic_09` | `"~/input/detection09/objects"` | TODO |
-| `input_object_list_topic_10` | `"~/input/detection10/objects"` | TODO |
-| `input_object_list_topic_11` | `"~/input/detection11/objects"` | TODO |
-| `input_object_list_topic_12` | `"~/input/detection12/objects"` | TODO |
-| `odometry_topic` | `"~/input/odometry"` | TODO |
-| `objects_topic` | `"~/output/objects"` | TODO |
-| `merged_objects_topic` | `"~/output/merged_objects"` | TODO |
+| `input_object_list_topic_01` | `"~/input/detection01/objects"` | Input objects |
+| `input_object_list_topic_02` | `"~/input/detection02/objects"` | Input objects |
+| `input_object_list_topic_03` | `"~/input/detection03/objects"` | Input objects |
+| `input_object_list_topic_04` | `"~/input/detection04/objects"` | Input objects |
+| `input_object_list_topic_05` | `"~/input/detection05/objects"` | Input objects |
+| `input_object_list_topic_06` | `"~/input/detection06/objects"` | Input objects |
+| `input_object_list_topic_07` | `"~/input/detection07/objects"` | Input objects |
+| `input_object_list_topic_08` | `"~/input/detection08/objects"` | Input objects |
+| `input_object_list_topic_09` | `"~/input/detection09/objects"` | Input objects |
+| `input_object_list_topic_10` | `"~/input/detection10/objects"` | Input objects |
+| `input_object_list_topic_11` | `"~/input/detection11/objects"` | Input objects |
+| `input_object_list_topic_12` | `"~/input/detection12/objects"` | Input objects |
+| `odometry_topic` | `"~/input/odometry"` | Odometry |
+| `objects_topic` | `"~/output/objects"` | Tracked objects |
+| `merged_objects_topic` | `"~/output/merged_objects"` | Merged objects |
 | `name` | `"autoware_multi_object_tracker"` | node name |
 | `namespace` | `""` | node namespace |
 | `log_level` | `"info"` | ROS logging level (debug, info, warn, error, fatal) |
-| `tracker_setting_path` | `os.path.join(package_share, "config", "multi_object_tracker_node.param.yaml")` | TODO |
-| `data_association_matrix_path` | `os.path.join(package_share, "config", "data_association_matrix.param.yaml")` | TODO |
-| `input_channels_path` | `os.path.join(package_share, "config", "input_channels.param.yaml")` | TODO |
-| `publish_merged_objects` | `"false"` | TODO |
+| `tracker_setting_path` | `os.path.join(package_share, "config", "multi_object_tracker_node.param.yaml")` | Tracker settings file |
+| `data_association_matrix_path` | `os.path.join(package_share, "config", "data_association_matrix.param.yaml")` | Data association matrix file |
+| `input_channels_path` | `os.path.join(package_share, "config", "input_channels.param.yaml")` | Input channels file |
+| `publish_merged_objects` | `"false"` | Wether merged objects are published |
 | `ego_source` | `"tf"` | ego pose source: tf (look up from TF tree) or odometry (interpolate from input/odometry) |
 | `use_sim_time` | `"false"` | use simulation clock |
 
