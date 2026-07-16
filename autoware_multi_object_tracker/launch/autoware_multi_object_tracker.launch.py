@@ -8,10 +8,10 @@ import os
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node, SetParameter
 from launch_ros.parameter_descriptions import ParameterValue
+from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 
 
 def generate_launch_description():
@@ -103,15 +103,15 @@ def generate_launch_description():
             LaunchConfiguration("data_association_matrix_path"),
             LaunchConfiguration("input_channels_path"),
             {
-                "publish_merged_objects": ParameterValue(
-                    LaunchConfiguration("publish_merged_objects"), value_type=bool
-                ),
+                "publish_merged_objects": ParameterValue(LaunchConfiguration("publish_merged_objects"), value_type=bool),
                 "ego_source": LaunchConfiguration("ego_source"),
             },
             {argument.name.replace("_", "/"): LaunchConfiguration(argument.name) for argument in channel_arguments},
         ],
         arguments=["--ros-args", "--log-level", LaunchConfiguration("log_level")],
-        remappings=[(f"~/{argument.name.replace('_', '/')}", LaunchConfiguration(argument.name)) for argument in remappable_topics],
+        remappings=[
+            (f"~/{argument.name.replace('_', '/')}", LaunchConfiguration(argument.name)) for argument in remappable_topics
+        ],
         additional_env={"LD_PRELOAD": LaunchConfiguration("ld_preload_value")},
         output="both",
         emulate_tty=True,
