@@ -6,24 +6,38 @@ services:
       # --- name ------
       NAMESPACE: /
       NAME: autoware_multi_object_tracker
+      # --- inputs ----
+      INPUT/DETECTION01/OBJECTS: ~/input/detection01/objects
+      INPUT/DETECTION02/OBJECTS: ~/input/detection02/objects
+      INPUT/DETECTION03/OBJECTS: ~/input/detection03/objects
+      INPUT/DETECTION04/OBJECTS: ~/input/detection04/objects
+      INPUT/DETECTION05/OBJECTS: ~/input/detection05/objects
+      INPUT/DETECTION06/OBJECTS: ~/input/detection06/objects
+      INPUT/DETECTION07/OBJECTS: ~/input/detection07/objects
+      INPUT/DETECTION08/OBJECTS: ~/input/detection08/objects
+      INPUT/DETECTION09/OBJECTS: ~/input/detection09/objects
+      INPUT/DETECTION10/OBJECTS: ~/input/detection10/objects
+      INPUT/DETECTION11/OBJECTS: ~/input/detection11/objects
+      INPUT/DETECTION12/OBJECTS: ~/input/detection12/objects
+      INPUT/ODOMETRY: ~/input/odometry
+      # --- outputs ---
+      OUTPUT/OBJECTS: ~/output/objects
+      OUTPUT/MERGED_OBJECTS: ~/output/merged_objects
       # --- other -----
-      INPUT_OBJECT_LIST_TOPIC_01: ~/input/detection01/objects
-      INPUT_OBJECT_LIST_TOPIC_02: ~/input/detection02/objects
-      INPUT_OBJECT_LIST_TOPIC_03: ~/input/detection03/objects
-      INPUT_OBJECT_LIST_TOPIC_04: ~/input/detection04/objects
-      INPUT_OBJECT_LIST_TOPIC_05: ~/input/detection05/objects
-      INPUT_OBJECT_LIST_TOPIC_06: ~/input/detection06/objects
-      INPUT_OBJECT_LIST_TOPIC_07: ~/input/detection07/objects
-      INPUT_OBJECT_LIST_TOPIC_08: ~/input/detection08/objects
-      INPUT_OBJECT_LIST_TOPIC_09: ~/input/detection09/objects
-      INPUT_OBJECT_LIST_TOPIC_10: ~/input/detection10/objects
-      INPUT_OBJECT_LIST_TOPIC_11: ~/input/detection11/objects
-      INPUT_OBJECT_LIST_TOPIC_12: ~/input/detection12/objects
-      ODOMETRY_TOPIC: ~/input/odometry
-      OBJECTS_TOPIC: ~/output/objects
-      MERGED_OBJECTS_TOPIC: ~/output/merged_objects
       LOG_LEVEL: ${LOG_LEVEL:-info}
       USE_SIM_TIME: ${USE_SIM_TIME:-false}
+      INPUT/DETECTION01/CHANNEL: ${INPUT/DETECTION01/CHANNEL:-none}
+      INPUT/DETECTION02/CHANNEL: ${INPUT/DETECTION02/CHANNEL:-none}
+      INPUT/DETECTION03/CHANNEL: ${INPUT/DETECTION03/CHANNEL:-none}
+      INPUT/DETECTION04/CHANNEL: ${INPUT/DETECTION04/CHANNEL:-none}
+      INPUT/DETECTION05/CHANNEL: ${INPUT/DETECTION05/CHANNEL:-none}
+      INPUT/DETECTION06/CHANNEL: ${INPUT/DETECTION06/CHANNEL:-none}
+      INPUT/DETECTION07/CHANNEL: ${INPUT/DETECTION07/CHANNEL:-none}
+      INPUT/DETECTION08/CHANNEL: ${INPUT/DETECTION08/CHANNEL:-none}
+      INPUT/DETECTION09/CHANNEL: ${INPUT/DETECTION09/CHANNEL:-none}
+      INPUT/DETECTION10/CHANNEL: ${INPUT/DETECTION10/CHANNEL:-none}
+      INPUT/DETECTION11/CHANNEL: ${INPUT/DETECTION11/CHANNEL:-none}
+      INPUT/DETECTION12/CHANNEL: ${INPUT/DETECTION12/CHANNEL:-none}
       TRACKER_SETTING_PATH: ${TRACKER_SETTING_PATH:-}
       DATA_ASSOCIATION_MATRIX_PATH: ${DATA_ASSOCIATION_MATRIX_PATH:-}
       INPUT_CHANNELS_PATH: ${INPUT_CHANNELS_PATH:-}
@@ -38,23 +52,35 @@ services:
           name:=$${NAME} \
           log_level:=$${LOG_LEVEL} \
           use_sim_time:=$${USE_SIM_TIME} \
+          input/detection01/channel:=$${INPUT/DETECTION01/CHANNEL} \
+          input/detection02/channel:=$${INPUT/DETECTION02/CHANNEL} \
+          input/detection03/channel:=$${INPUT/DETECTION03/CHANNEL} \
+          input/detection04/channel:=$${INPUT/DETECTION04/CHANNEL} \
+          input/detection05/channel:=$${INPUT/DETECTION05/CHANNEL} \
+          input/detection06/channel:=$${INPUT/DETECTION06/CHANNEL} \
+          input/detection07/channel:=$${INPUT/DETECTION07/CHANNEL} \
+          input/detection08/channel:=$${INPUT/DETECTION08/CHANNEL} \
+          input/detection09/channel:=$${INPUT/DETECTION09/CHANNEL} \
+          input/detection10/channel:=$${INPUT/DETECTION10/CHANNEL} \
+          input/detection11/channel:=$${INPUT/DETECTION11/CHANNEL} \
+          input/detection12/channel:=$${INPUT/DETECTION12/CHANNEL} \
           $${TRACKER_SETTING_PATH:+tracker_setting_path:=$${TRACKER_SETTING_PATH}} \
           $${DATA_ASSOCIATION_MATRIX_PATH:+data_association_matrix_path:=$${DATA_ASSOCIATION_MATRIX_PATH}} \
           $${INPUT_CHANNELS_PATH:+input_channels_path:=$${INPUT_CHANNELS_PATH}} \
           publish_merged_objects:=$${PUBLISH_MERGED_OBJECTS} \
           ego_source:=$${EGO_SOURCE} \
-          input_object_list_topic_01:=$${INPUT_OBJECT_LIST_TOPIC_01} \
-          input_object_list_topic_02:=$${INPUT_OBJECT_LIST_TOPIC_02} \
-          input_object_list_topic_03:=$${INPUT_OBJECT_LIST_TOPIC_03} \
-          input_object_list_topic_04:=$${INPUT_OBJECT_LIST_TOPIC_04} \
-          input_object_list_topic_05:=$${INPUT_OBJECT_LIST_TOPIC_05} \
-          input_object_list_topic_06:=$${INPUT_OBJECT_LIST_TOPIC_06} \
-          input_object_list_topic_07:=$${INPUT_OBJECT_LIST_TOPIC_07} \
-          input_object_list_topic_08:=$${INPUT_OBJECT_LIST_TOPIC_08} \
-          input_object_list_topic_09:=$${INPUT_OBJECT_LIST_TOPIC_09} \
-          input_object_list_topic_10:=$${INPUT_OBJECT_LIST_TOPIC_10} \
-          input_object_list_topic_11:=$${INPUT_OBJECT_LIST_TOPIC_11} \
-          input_object_list_topic_12:=$${INPUT_OBJECT_LIST_TOPIC_12} \
-          odometry_topic:=$${ODOMETRY_TOPIC} \
-          objects_topic:=$${OBJECTS_TOPIC} \
-          merged_objects_topic:=$${MERGED_OBJECTS_TOPIC}
+          input/detection01/objects:=$${INPUT/DETECTION01/OBJECTS} \
+          input/detection02/objects:=$${INPUT/DETECTION02/OBJECTS} \
+          input/detection03/objects:=$${INPUT/DETECTION03/OBJECTS} \
+          input/detection04/objects:=$${INPUT/DETECTION04/OBJECTS} \
+          input/detection05/objects:=$${INPUT/DETECTION05/OBJECTS} \
+          input/detection06/objects:=$${INPUT/DETECTION06/OBJECTS} \
+          input/detection07/objects:=$${INPUT/DETECTION07/OBJECTS} \
+          input/detection08/objects:=$${INPUT/DETECTION08/OBJECTS} \
+          input/detection09/objects:=$${INPUT/DETECTION09/OBJECTS} \
+          input/detection10/objects:=$${INPUT/DETECTION10/OBJECTS} \
+          input/detection11/objects:=$${INPUT/DETECTION11/OBJECTS} \
+          input/detection12/objects:=$${INPUT/DETECTION12/OBJECTS} \
+          input/odometry:=$${INPUT/ODOMETRY} \
+          output/objects:=$${OUTPUT/OBJECTS} \
+          output/merged_objects:=$${OUTPUT/MERGED_OBJECTS}
