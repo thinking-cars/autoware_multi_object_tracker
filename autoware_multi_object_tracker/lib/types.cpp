@@ -21,7 +21,9 @@
 #include <perception_msgs/msg/iscactr.hpp>
 #include <perception_msgs/msg/object_classification.hpp>
 
+#include <array>
 #include <cmath>
+#include <limits>
 #include <vector>
 
 namespace autoware::multi_object_tracker
@@ -115,6 +117,26 @@ std::vector<perception_msgs::msg::ObjectClassification> toPerceptionClassificati
   return result;
 }
 
+bool hasValidCovariance2d(const std::array<double, 36> & covariance)
+{
+  const double xx = covariance[0];
+  const double xy = covariance[1];
+  const double yx = covariance[6];
+  const double yy = covariance[7];
+
+  // perception_msgs uses -1 for invalid variance and DBL_MAX for unknown covariance.
+  constexpr double unknown_covariance = std::numeric_limits<double>::max();
+  const auto is_valid_variance = [unknown_covariance](const double value) {
+    return std::isfinite(value) && value >= 0.0 && value != unknown_covariance;
+  };
+  const auto is_valid_cross_covariance = [unknown_covariance](const double value) {
+    return std::isfinite(value) && std::abs(value) != unknown_covariance;
+  };
+
+  return is_valid_variance(xx) && is_valid_variance(yy) && is_valid_cross_covariance(xy) &&
+         is_valid_cross_covariance(yx);
+}
+
 }  // namespace
 
 DynamicObject toDynamicObject(
@@ -161,10 +183,12 @@ DynamicObject toDynamicObject(
   dynamic_object.twist_covariance[7] = vel_with_cov.covariance[7];   // var(vy,vy)
 
   // Kinematics flags
-  dynamic_object.kinematics.has_position_covariance = true;
+  dynamic_object.kinematics.has_position_covariance =
+    hasValidCovariance2d(dynamic_object.pose_covariance);
   dynamic_object.kinematics.orientation_availability = OrientationAvailability::AVAILABLE;
   dynamic_object.kinematics.has_twist = true;
-  dynamic_object.kinematics.has_twist_covariance = true;
+  dynamic_object.kinematics.has_twist_covariance =
+    hasValidCovariance2d(dynamic_object.twist_covariance);
   dynamic_object.kinematics.is_stationary = false;
 
   // Shape — ISCACTR stores WIDTH(y), LENGTH(x), HEIGHT(z)
