@@ -225,6 +225,7 @@ struct InputChannel
   bool trust_extension = true;                             // trust object extension
   bool trust_classification = true;                        // trust object classification
   bool trust_orientation = true;                           // trust object orientation(yaw)
+  bool trust_velocity = true;                              // trust object velocity/twist
   AssociationType associator_type = AssociationType::BEV;  // which associator to use
 };
 
