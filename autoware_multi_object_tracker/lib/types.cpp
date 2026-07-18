@@ -23,6 +23,7 @@
 
 #include <array>
 #include <cmath>
+#include <cstring>
 #include <limits>
 #include <vector>
 
@@ -254,11 +255,11 @@ perception_msgs::msg::Object toObjectMsg(const DynamicObject & dyn_object)
 
   perception_msgs::msg::Object obj;
 
-  // Encode UUID as uint64 using the first 8 bytes
+  // Encode UUID as uint64 using the first 8 bytes. The UUID generator memcpy's its counter into
+  // these bytes (host byte order), so read them back the same way to recover the small counter
+  // value as the track id.
   uint64_t id = 0;
-  for (int i = 0; i < 8; ++i) {
-    id |= static_cast<uint64_t>(dyn_object.uuid.uuid[i]) << (56 - 8 * i);
-  }
+  std::memcpy(&id, dyn_object.uuid.uuid.data(), sizeof(id));
   obj.id = id;
 
   obj.existence_probability = dyn_object.existence_probability;
