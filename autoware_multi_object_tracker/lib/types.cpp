@@ -23,6 +23,7 @@
 
 #include <array>
 #include <cmath>
+#include <cstring>
 #include <limits>
 #include <vector>
 
@@ -170,17 +171,27 @@ DynamicObject toDynamicObject(
   const auto pose_cov_vec = getPoseCovariance(obj.state);
   std::copy(pose_cov_vec.begin(), pose_cov_vec.end(), dynamic_object.pose_covariance.begin());
 
-  // Velocity: XYZ in header frame (rotated from object-frame lon/lat using yaw)
-  const auto vel_xyz = getVelocityXYZ(obj.state);
-  dynamic_object.twist.linear = vel_xyz;
+  // Velocity — DynamicObject.twist is in the object frame (lon/lat), same as the
+  // perception_msgs state, so take lon/lat directly without rotating into the header frame
+  dynamic_object.twist.linear = getVelocity(obj.state);
 
-  // Twist covariance — extract the 2×2 XY block from the velocity covariance
-  const auto vel_with_cov = getVelocityXYZWithCovariance(obj.state);
+  // Twist covariance — object-frame lon/lat 2×2 block, read directly from the state covariance
   dynamic_object.twist_covariance.fill(0.0);
-  dynamic_object.twist_covariance[0] = vel_with_cov.covariance[0];   // var(vx,vx)
-  dynamic_object.twist_covariance[1] = vel_with_cov.covariance[1];   // cov(vx,vy)
-  dynamic_object.twist_covariance[6] = vel_with_cov.covariance[6];   // cov(vy,vx)
-  dynamic_object.twist_covariance[7] = vel_with_cov.covariance[7];   // var(vy,vy)
+  const auto & model_id = obj.state.model_id;
+  if (hasVelLon(model_id)) {
+    const int lon = indexVelLon(model_id);
+    dynamic_object.twist_covariance[0] =
+      getContinuousStateCovarianceAt(obj.state, lon, lon);  // var(v_lon)
+    if (hasVelLat(model_id)) {
+      const int lat = indexVelLat(model_id);
+      dynamic_object.twist_covariance[1] =
+        getContinuousStateCovarianceAt(obj.state, lon, lat);  // cov(v_lon,v_lat)
+      dynamic_object.twist_covariance[6] =
+        getContinuousStateCovarianceAt(obj.state, lat, lon);  // cov(v_lat,v_lon)
+      dynamic_object.twist_covariance[7] =
+        getContinuousStateCovarianceAt(obj.state, lat, lat);  // var(v_lat)
+    }
+  }
 
   // Kinematics flags
   dynamic_object.kinematics.has_position_covariance =
@@ -244,11 +255,11 @@ perception_msgs::msg::Object toObjectMsg(const DynamicObject & dyn_object)
 
   perception_msgs::msg::Object obj;
 
-  // Encode UUID as uint64 using the first 8 bytes
+  // Encode UUID as uint64 using the first 8 bytes. The UUID generator memcpy's its counter into
+  // these bytes (host byte order), so read them back the same way to recover the small counter
+  // value as the track id.
   uint64_t id = 0;
-  for (int i = 0; i < 8; ++i) {
-    id |= static_cast<uint64_t>(dyn_object.uuid.uuid[i]) << (56 - 8 * i);
-  }
+  std::memcpy(&id, dyn_object.uuid.uuid.data(), sizeof(id));
   obj.id = id;
 
   obj.existence_probability = dyn_object.existence_probability;
@@ -262,13 +273,20 @@ perception_msgs::msg::Object toObjectMsg(const DynamicObject & dyn_object)
   // Pose covariance (position + orientation)
   setPoseCovariance(obj.state, dyn_object.pose_covariance);
 
-  // Yaw and velocity (XYZ → lon/lat using yaw)
+  // Yaw
   const double yaw = tf2::getYaw(dyn_object.pose.orientation);
-  const double var_vx = dyn_object.twist_covariance[0];
-  const double cov_vxy = dyn_object.twist_covariance[1];
-  const double var_vy = dyn_object.twist_covariance[7];
-  setVelocityXYZYawWithCovariance(
-    obj.state, dyn_object.twist.linear, yaw, var_vx, var_vy, cov_vxy);
+  setYaw(obj.state, yaw, false);
+
+  // Velocity — DynamicObject.twist is already in the object frame (lon/lat), same as the
+  // perception_msgs state, so write lon/lat and its covariance directly without rotation
+  setVelocity(
+    obj.state, std::array<double, 2>{dyn_object.twist.linear.x, dyn_object.twist.linear.y}, false);
+  const int lon = indexVelLon(ISCACTR::MODEL_ID);
+  const int lat = indexVelLat(ISCACTR::MODEL_ID);
+  setContinuousStateCovarianceAt(obj.state, lon, lon, dyn_object.twist_covariance[0]);
+  setContinuousStateCovarianceAt(obj.state, lon, lat, dyn_object.twist_covariance[1]);
+  setContinuousStateCovarianceAt(obj.state, lat, lon, dyn_object.twist_covariance[6]);
+  setContinuousStateCovarianceAt(obj.state, lat, lat, dyn_object.twist_covariance[7]);
 
   // Dimensions — shape.dimensions.x=length, .y=width, .z=height for BOUNDING_BOX
   setLength(obj.state, dyn_object.shape.dimensions.x, false);
