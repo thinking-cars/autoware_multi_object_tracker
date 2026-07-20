@@ -1,3 +1,108 @@
+# `autoware_multi_object_tracker`
+
+The ROS 2 autoware_multi_object_tracker package
+
+## Nodes
+
+### `multi_object_tracker`
+
+```mermaid
+flowchart LR
+    NODE("multi_object_tracker")
+    S0:::hidden -->|~/input/detection01/objects| NODE
+    S1:::hidden -->|~/input/detection02/objects| NODE
+    S2:::hidden -->|~/input/detection03/objects| NODE
+    S3:::hidden -->|~/input/detection04/objects| NODE
+    S4:::hidden -->|~/input/detection05/objects| NODE
+    S5:::hidden -->|~/input/detection06/objects| NODE
+    S6:::hidden -->|~/input/detection07/objects| NODE
+    S7:::hidden -->|~/input/detection08/objects| NODE
+    S8:::hidden -->|~/input/detection09/objects| NODE
+    S9:::hidden -->|~/input/detection10/objects| NODE
+    S10:::hidden -->|~/input/detection11/objects| NODE
+    S11:::hidden -->|~/input/detection12/objects| NODE
+    S12:::hidden -->|~/input/odometry| NODE
+    NODE -->|~/output/objects| P0:::hidden
+    NODE -->|~/output/merged_objects| P1:::hidden
+    NODE -->|~/debug/processing_time_detail_ms| P2:::hidden
+    NODE -->|~/debug/tentative_objects| P3:::hidden
+    NODE -->|~/debug/objects_markers| P4:::hidden
+    classDef hidden display: none;
+```
+
+#### Subscribed Topics
+
+| Topic | Type | Description |
+| --- | --- | --- |
+| `~/input/detection01/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 1. |
+| `~/input/detection02/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 2. |
+| `~/input/detection03/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 3. |
+| `~/input/detection04/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 4. |
+| `~/input/detection05/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 5. |
+| `~/input/detection06/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 6. |
+| `~/input/detection07/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 7. |
+| `~/input/detection08/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 8. |
+| `~/input/detection09/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 9. |
+| `~/input/detection10/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 10. |
+| `~/input/detection11/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 11. |
+| `~/input/detection12/objects` | `perception_msgs/msg/ObjectList` | Detected objects from input channel 12. |
+| `~/input/odometry` | `nav_msgs/msg/Odometry` | Ego odometry used when `ego_source` is `odometry`. |
+
+#### Published Topics
+
+| Topic | Type | Description |
+| --- | --- | --- |
+| `~/output/objects` | `perception_msgs/msg/ObjectList` | Tracked objects |
+| `~/output/merged_objects` | `perception_msgs/msg/ObjectList` | Merged objects |
+| `~/debug/processing_time_detail_ms` | `autoware_utils_debug/ProcessingTimeDetail` | Processing time |
+| `~/debug/tentative_objects` | `perception_msgs/msg/ObjectList` | Tentative tracked objects; available when `publish_tentative_objects` is enabled. |
+| `~/debug/objects_markers` | `visualization_msgs/msg/MarkerArray` | Tracker, detection, association, and existence-probability markers; available when `publish_debug_markers` is enabled. |
+
+## Launch Files
+
+### [`autoware_multi_object_tracker.launch.py`](launch/autoware_multi_object_tracker.launch.py)
+
+| Argument | Default | Description |
+| --- | --- | --- |
+| `input_detection01_objects` | `"~/input_detection01_objects"` | Remapping target for detected objects from input channel 1. |
+| `input_detection02_objects` | `"~/input_detection02_objects"` | Remapping target for detected objects from input channel 2. |
+| `input_detection03_objects` | `"~/input_detection03_objects"` | Remapping target for detected objects from input channel 3. |
+| `input_detection04_objects` | `"~/input_detection04_objects"` | Remapping target for detected objects from input channel 4. |
+| `input_detection05_objects` | `"~/input_detection05_objects"` | Remapping target for detected objects from input channel 5. |
+| `input_detection06_objects` | `"~/input_detection06_objects"` | Remapping target for detected objects from input channel 6. |
+| `input_detection07_objects` | `"~/input_detection07_objects"` | Remapping target for detected objects from input channel 7. |
+| `input_detection08_objects` | `"~/input_detection08_objects"` | Remapping target for detected objects from input channel 8. |
+| `input_detection09_objects` | `"~/input_detection09_objects"` | Remapping target for detected objects from input channel 9. |
+| `input_detection10_objects` | `"~/input_detection10_objects"` | Remapping target for detected objects from input channel 10. |
+| `input_detection11_objects` | `"~/input_detection11_objects"` | Remapping target for detected objects from input channel 11. |
+| `input_detection12_objects` | `"~/input_detection12_objects"` | Remapping target for detected objects from input channel 12. |
+| `input_odometry` | `"~/input_odometry"` | Remapping target for the ego-odometry input. |
+| `output_objects` | `"~/output_objects"` | Remapping target for tracked objects. |
+| `output_merged_objects` | `"~/output_merged_objects"` | Remapping target for merged detected objects. |
+| `input_detection01_channel` | `"none"` | Configuration profile for input channel 1; `none` disables the input. |
+| `input_detection02_channel` | `"none"` | Configuration profile for input channel 2; `none` disables the input. |
+| `input_detection03_channel` | `"none"` | Configuration profile for input channel 3; `none` disables the input. |
+| `input_detection04_channel` | `"none"` | Configuration profile for input channel 4; `none` disables the input. |
+| `input_detection05_channel` | `"none"` | Configuration profile for input channel 5; `none` disables the input. |
+| `input_detection06_channel` | `"none"` | Configuration profile for input channel 6; `none` disables the input. |
+| `input_detection07_channel` | `"none"` | Configuration profile for input channel 7; `none` disables the input. |
+| `input_detection08_channel` | `"none"` | Configuration profile for input channel 8; `none` disables the input. |
+| `input_detection09_channel` | `"none"` | Configuration profile for input channel 9; `none` disables the input. |
+| `input_detection10_channel` | `"none"` | Configuration profile for input channel 10; `none` disables the input. |
+| `input_detection11_channel` | `"none"` | Configuration profile for input channel 11; `none` disables the input. |
+| `input_detection12_channel` | `"none"` | Configuration profile for input channel 12; `none` disables the input. |
+| `name` | `"autoware_multi_object_tracker"` | node name |
+| `namespace` | `""` | node namespace |
+| `log_level` | `"info"` | ROS logging level (debug, info, warn, error, fatal) |
+| `tracker_setting_path` | `os.path.join(package_share, "config", "multi_object_tracker_node.param.yaml")` | Tracker settings file |
+| `data_association_matrix_path` | `os.path.join(package_share, "config", "data_association_matrix.param.yaml")` | Data association matrix file |
+| `input_channels_path` | `os.path.join(package_share, "config", "input_channels.param.yaml")` | Input channels file |
+| `publish_merged_objects` | `"false"` | Whether merged objects are published. |
+| `ego_source` | `"tf"` | ego pose source: tf (look up from TF tree) or odometry (interpolate from input/odometry) |
+| `use_sim_time` | `"false"` | use simulation clock |
+
+--- Original README ---
+
 # multi_object_tracker
 
 ## Purpose

@@ -1,0 +1,30 @@
+services:
+
+  autonomy-datasets:
+    image: ghcr.io/thinking-cars/autonomy_datasets:v1.2.0
+    command: bash -ic "ros2 launch autonomy_datasets autonomy_datasets.launch.py dataset:=nuscenes"
+    environment:
+      RMW_IMPLEMENTATION: rmw_fastrtps_cpp
+      DISPLAY: ${DISPLAY:-""}
+    volumes:
+      - $DATASET_DIR:/datasets
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./config.rviz:/docker-ros/ws/install/autonomy_datasets/share/autonomy_datasets/config/config.rviz
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  autoware-multi-object-tracker:
+    extends:
+      file: docker/compose/docker-compose.yml
+      service: autoware-multi-object-tracker
+    environment:
+      RMW_IMPLEMENTATION: rmw_fastrtps_cpp
+      USE_SIM_TIME: true
+      INPUT_DETECTION01_OBJECTS: /object_list/lidar_01
+      INPUT_DETECTION01_CHANNEL: detected_objects
+      OUTPUT_OBJECTS: /object_list/tracked

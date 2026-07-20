@@ -16,6 +16,10 @@ This repository integrates the [autoware_multi_object_tracker](https://github.co
 > [!IMPORTANT]
 > This repository is a prototypical integration of the `autoware_multi_object_tracker` into [OpenADS](https://github.com/openads-project) for testing and benchmarking purposes. Thus, only necessary changes were made for integration without adopting the Autoware module to the OpenADS consistency guidelines. These adoptions will only be made in case of a full integration into OpenADS after testing and benchmarking. 
 
+The following teaser shows **tracked objects (pink)** using the nuScenes dataset provided by [autonomy_datasets](https://github.com/thinking-cars/autonomy_datasets).
+
+![Teaser](./assets/teaser-nuscenes.gif)
+
 <p align="center">
   <strong>🚀 <a href="#-quick-start">Quick Start</a></strong> • <strong>💻 <a href="#-development">Development</a></strong> • <strong>📝 <a href="#-documentation">Documentation</a></strong>
 </p>
@@ -23,14 +27,17 @@ This repository integrates the [autoware_multi_object_tracker](https://github.co
 
 ## 🚀 Quick Start
 
-1. Start a container of the pre-built runtime image.
-    ```bash
-    docker run --rm -it ghcr.io/thinking-cars/autoware_multi_object_tracker:latest bash
-    ```
-1. Inside the container, launch the pre-built nodes.
-    ```bash
-    ros2 launch autoware_multi_object_tracker multi_object_tracker.launch.xml
-    ```
+Start a container of the pre-built runtime image along with [autonomy_datasets](https://github.com/thinking-cars/autonomy_datasets) providing test data from different datasets. Make sure to have dataset files available as described in the README.
+
+```bash
+# allow graphical output of containers
+xhost +local:
+
+# pull and run containers
+docker compose up
+
+# stop containers with Ctrl-C
+```
 
 ## 💻 Development
 
@@ -51,8 +58,12 @@ This repository integrates the [autoware_multi_object_tracker](https://github.co
     ```
 1. Install the recommended VS Code extensions.
     > *Ctrl+Shift+P / Extensions: Show Recommended Extensions / Install Workspace Recommended Extensions (Cloud Download Icon)*
-1. Reopen the repository in a [Dev Container](https://code.visualstudio.com/docs/devcontainers/containers).
-    > *Ctrl+Shift+P / Dev Containers: Rebuild and Reopen in Container*
+1. Reopen in Dev Container or start Docker composition with test data
+    1. **Option A:** Reopen the repository in a [Dev Container](https://code.visualstudio.com/docs/devcontainers/containers).
+        > *Ctrl+Shift+P / Dev Containers: Rebuild and Reopen in Container*
+    1. **Option B:** Start a Docker container for this repository along with an [autonomy_datasets](https://github.com/thinking-cars/autonomy_datasets) container and attach VS Code to the running container.
+        > `docker compose -f docker-compose.dev.yml up -d`
+        > *Ctrl+Shift+P / Dev Containers: Attach to Running Container...*
 
 ### Build
 
