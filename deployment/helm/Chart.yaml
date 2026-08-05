@@ -1,0 +1,9 @@
+apiVersion: v2
+name: autoware-multi-object-tracker
+version: 1.1.0
+appVersion: 1.1.0
+description: Modularized multi object tracker from Autoware Universe
+dependencies:
+  - repository: oci://ghcr.io/openads-project/openads-helm
+    name: openadservice
+    version: 1.0.0
