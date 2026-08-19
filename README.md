@@ -7,9 +7,12 @@
   <br>
   <a href="https://github.com/thinking-cars/autoware_multi_object_tracker/actions/workflows/docker-ros.yml"><img src="https://github.com/thinking-cars/autoware_multi_object_tracker/actions/workflows/docker-ros.yml/badge.svg"/></a>
   <a href="https://github.com/thinking-cars/autoware_multi_object_tracker/actions/workflows/compose-oci.yml"><img src="https://github.com/thinking-cars/autoware_multi_object_tracker/actions/workflows/compose-oci.yml/badge.svg"/></a>
+  <a href="https://github.com/thinking-cars/autoware_multi_object_tracker/actions/workflows/helm-oci.yml"><img src="https://github.com/thinking-cars/autoware_multi_object_tracker/actions/workflows/helm-oci.yml/badge.svg"/></a>
   <a href="https://thinking-cars.github.io/autoware_multi_object_tracker"><img src="https://github.com/thinking-cars/autoware_multi_object_tracker/actions/workflows/docs.yml/badge.svg"/></a>
   <a href="https://github.com/thinking-cars/autoware_multi_object_tracker/actions/workflows/consistency.yml"><img src="https://github.com/thinking-cars/autoware_multi_object_tracker/actions/workflows/consistency.yml/badge.svg"/></a>
 </p>
+
+**Modularized multi object tracker from Autoware Universe**
 
 This repository integrates the [autoware_multi_object_tracker](https://github.com/autowarefoundation/autoware_universe/tree/e18a5311e509574326ae0ff6256108326a8132d0/perception/autoware_multi_object_tracker) package for multi-object tracking from [Autoware Universe](https://github.com/autowarefoundation/autoware_universe) into the [OpenADS](https://github.com/openads-project) ecosystem, which emphasizes a modular microservice architecture. Hence, this repository is self-contained and includes only the necessary dependencies.
 
