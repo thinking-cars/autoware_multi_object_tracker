@@ -1,5 +1,29 @@
 repositories:
   perception_interfaces:
     type: git
-    url: https://github.com/ika-rwth-aachen/perception_interfaces
+    url: https://github.com/ika-rwth-aachen/perception_interfaces.git
     version: v1.1.0
+  autoware_cmake:
+    type: git
+    url: https://github.com/autowarefoundation/autoware_cmake.git
+    version: 1.2.0
+  autoware_msgs:
+    type: git
+    url: https://github.com/autowarefoundation/autoware_msgs.git
+    version: 1.12.0
+  autoware_internal_msgs:
+    type: git
+    url: https://github.com/autowarefoundation/autoware_internal_msgs.git
+    version: 1.12.1
+  autoware_utils:
+    type: git
+    url: https://github.com/autowarefoundation/autoware_utils.git
+    version: 1.7.2
+  autoware_core:
+    type: git
+    url: https://github.com/autowarefoundation/autoware_core.git
+    version: 78a358b35bc88f89abfe05c86b01b543991d098e
+  mussp:
+    type: git
+    url: https://github.com/tier4/muSSP.git
+    version: tier4/main
