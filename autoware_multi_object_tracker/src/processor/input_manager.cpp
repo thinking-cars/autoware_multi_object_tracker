@@ -77,6 +77,10 @@ std::optional<types::DynamicObjectList> InputStream::processMessage(
   // Set trust_extension information from channel configuration
   for (auto & object : dynamic_objects.objects) {
     object.trust_extension = channel_.trust_extension;
+    if (!channel_.trust_velocity) {
+      object.kinematics.has_twist = false;
+      object.kinematics.has_twist_covariance = false;
+    }
   }
 
   // Model the object uncertainty only if it is not available
