@@ -8,10 +8,12 @@ import os
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node, SetParameter
 from launch_ros.parameter_descriptions import ParameterValue
 from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
+from tracetools_launch.action import Trace
 
 
 def generate_launch_description():
@@ -81,6 +83,7 @@ def generate_launch_description():
             description="ego pose source: tf (look up from TF tree) or odometry (interpolate from input/odometry)",
         ),
         DeclareLaunchArgument("use_sim_time", default_value="false", description="use simulation clock"),
+        DeclareLaunchArgument("ros_tracing", default_value="false", description="Enable tracing"),
     ]
 
     agnocast_environment = IncludeLaunchDescription(
@@ -93,35 +96,42 @@ def generate_launch_description():
         )
     )
 
-    node = Node(
-        package="autoware_multi_object_tracker",
-        executable="multi_object_tracker_node",
-        namespace=LaunchConfiguration("namespace"),
-        name=LaunchConfiguration("name"),
-        parameters=[
-            LaunchConfiguration("tracker_setting_path"),
-            LaunchConfiguration("data_association_matrix_path"),
-            LaunchConfiguration("input_channels_path"),
-            {
-                "publish_merged_objects": ParameterValue(LaunchConfiguration("publish_merged_objects"), value_type=bool),
-                "ego_source": LaunchConfiguration("ego_source"),
-            },
-            {argument.name.replace("_", "/"): LaunchConfiguration(argument.name) for argument in channel_arguments},
-        ],
-        arguments=["--ros-args", "--log-level", LaunchConfiguration("log_level")],
-        remappings=[
-            (f"~/{argument.name.replace('_', '/')}", LaunchConfiguration(argument.name)) for argument in remappable_topics
-        ],
-        additional_env={"LD_PRELOAD": LaunchConfiguration("ld_preload_value")},
-        output="both",
-        emulate_tty=True,
-    )
+    nodes = [
+        Node(
+            package="autoware_multi_object_tracker",
+            executable="multi_object_tracker_node",
+            namespace=LaunchConfiguration("namespace"),
+            name=LaunchConfiguration("name"),
+            parameters=[
+                LaunchConfiguration("tracker_setting_path"),
+                LaunchConfiguration("data_association_matrix_path"),
+                LaunchConfiguration("input_channels_path"),
+                {
+                    "publish_merged_objects": ParameterValue(LaunchConfiguration("publish_merged_objects"), value_type=bool),
+                    "ego_source": LaunchConfiguration("ego_source"),
+                },
+                {argument.name.replace("_", "/"): LaunchConfiguration(argument.name) for argument in channel_arguments},
+            ],
+            arguments=["--ros-args", "--log-level", LaunchConfiguration("log_level")],
+            remappings=[
+                (f"~/{argument.name.replace('_', '/')}", LaunchConfiguration(argument.name)) for argument in remappable_topics
+            ],
+            additional_env={"LD_PRELOAD": LaunchConfiguration("ld_preload_value")},
+            output="both",
+            emulate_tty=True,
+        ),
+        Trace(
+            session_name="trace",
+            dual_session=True,
+            condition=IfCondition(LaunchConfiguration("ros_tracing")),
+        ),
+    ]
 
     return LaunchDescription(
         [
             *args,
             agnocast_environment,
             SetParameter("use_sim_time", LaunchConfiguration("use_sim_time")),
-            node,
+            *nodes,
         ]
     )
