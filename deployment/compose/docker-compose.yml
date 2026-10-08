@@ -1,7 +1,7 @@
 services:
 
   autoware-multi-object-tracker:
-    image: ghcr.io/thinking-cars/autoware_multi_object_tracker:v1.1.1
+    image: ghcr.io/thinking-cars/autoware_multi_object_tracker:v1.2.0
     environment:
       # --- name ------
       NAMESPACE: /
