@@ -33,6 +33,8 @@
 #include <utility>
 #include <vector>
 
+#include <tracetools/tracetools.h>
+
 namespace autoware::multi_object_tracker
 {
 using autoware_utils_debug::ScopedTimeTrack;
@@ -298,6 +300,29 @@ MultiObjectTracker::MultiObjectTracker(const rclcpp::NodeOptions & node_options)
     // if the input is multi-channel, export fused merged (detected) objects
     merged_objects_pub_ = create_publisher<perception_msgs::msg::ObjectList>(
       "~/output/merged_objects", rclcpp::QoS{1});
+  }
+
+  // Annotate message links for tracing: each output depends on all enabled input channels.
+  std::vector<const void*> link_subs;
+  std::vector<const void*> link_pubs;
+  for (const auto& sub_objects : sub_objects_array_) {
+    // disabled input channels leave null entries in the array
+    if (!sub_objects) {
+      continue;
+    }
+    link_subs.push_back(static_cast<const void*>(sub_objects->get_subscription_handle().get()));
+  }
+  link_pubs.push_back(static_cast<const void*>(tracked_objects_pub_->get_publisher_handle().get()));
+  if (merged_objects_pub_) {
+    link_pubs.push_back(static_cast<const void*>(merged_objects_pub_->get_publisher_handle().get()));
+  }
+  if (sub_odometry_) {
+    link_subs.push_back(static_cast<const void*>(sub_odometry_->get_subscription_handle().get()));
+  }
+  if (params_.publish_on_timer) {
+    TRACETOOLS_TRACEPOINT(message_link_periodic_async, link_subs.data(), link_subs.size(), link_pubs.data(), link_pubs.size());
+  } else {
+    TRACETOOLS_TRACEPOINT(message_link_partial_sync, link_subs.data(), link_subs.size(), link_pubs.data(), link_pubs.size());
   }
 
   ////// callback timer
